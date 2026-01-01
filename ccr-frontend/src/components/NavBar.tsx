@@ -18,14 +18,24 @@ function NavBar() {
   return (
     <>
       {/* mobile view */}
-      <div className='bg-black flex items-center justify-between'>
+      <div className='bg-black flex items-center justify-between rounded-b-lg'>
         <a href='#home'>
-          <Logo className='size-50' />
+          <Logo className='size-26' />
         </a>
         <div className='mr-8'>
           <Hamburger toggled={IsOpen} toggle={changeSetOpen} color='white' />
         </div>
       </div>
+
+      <ul>
+        {navBarItems.map(item => (
+          <li key={item.id}>
+            <a href={item.href}>
+              {item.title}
+            </a>
+          </li>
+        ))}
+      </ul>
 
       {/* desktop view */}
       {/* <nav className="bg-black flex">
