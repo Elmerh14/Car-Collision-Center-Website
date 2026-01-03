@@ -18,7 +18,7 @@ function NavBar() {
   return (
     <>
       {/* mobile view */}
-      <div className='bg-black flex items-center justify-between rounded-b-lg'>
+      <div className='bg-black flex items-center justify-between'>
         <a href='#home'>
           <Logo className='size-26' />
         </a>
@@ -27,15 +27,19 @@ function NavBar() {
         </div>
       </div>
 
-      <ul>
-        {navBarItems.map(item => (
-          <li key={item.id}>
-            <a href={item.href}>
-              {item.title}
-            </a>
-          </li>
-        ))}
-      </ul>
+      {IsOpen && <div className='bg-black'>
+        <ul className='flex flex-col justify-center items-center'>
+          {navBarItems.map(item => (
+            <li key={item.id}>
+              <a href={item.href}
+                className='text-white'>
+                {item.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      }
 
       {/* desktop view */}
       {/* <nav className="bg-black flex">
