@@ -12,9 +12,6 @@ function NavBar() {
 
   const [IsOpen, setOpen] = useState(false);
 
-  function changeSetOpen() {
-    setOpen(prev => !prev)
-  }
   return (
     <>
       {/* mobile view */}
@@ -23,12 +20,12 @@ function NavBar() {
           <Logo className='size-26' />
         </a>
         <div className='mr-8'>
-          <Hamburger toggled={IsOpen} toggle={changeSetOpen} color='white' />
+          <Hamburger toggled={IsOpen} toggle={setOpen} color='white' />
         </div>
       </div>
 
-      {IsOpen && <div className='bg-black'>
-        <ul className='flex flex-col justify-center items-center'>
+      {IsOpen && <div className='bg-black fixed inset-0 left-0 w-1/2 flex flex-col items-center py-5 text-lg font-bold'>
+        <ul className='flex flex-col gap-10'>
           {navBarItems.map(item => (
             <li key={item.id}>
               <a href={item.href}
