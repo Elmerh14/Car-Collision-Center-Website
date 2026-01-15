@@ -15,45 +15,44 @@ function NavBar() {
   return (
     <>
       {/* mobile view */}
-      <div className='bg-black flex items-center justify-between'>
-        <a href='#home'>
-          <Logo className='size-26' />
-        </a>
-        <div className='mr-8'>
-          <Hamburger toggled={IsOpen} toggle={setOpen} color='white' />
-        </div>
-      </div>
-
-      {IsOpen && <div className='bg-black fixed inset-0 left-0 w-1/2 flex flex-col items-center py-5 text-lg font-bold'>
-        <ul className='flex flex-col gap-10'>
-          {navBarItems.map(item => (
-            <li key={item.id}>
-              <a href={item.href}
-                className='text-white'>
-                {item.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-      }
-
-      {/* desktop view */}
-      {/* <nav className="bg-black flex">
-        <div>
+      <nav className='md:hidden'>
+        <div className='bg-black flex items-center justify-between'>
           <a href='#home'>
-            <img className='size-20' src={logo} alt='car collison center navigation bar logo.' />
+            <Logo className='size-26' />
           </a>
+          <div className='mr-8'>
+            <Hamburger toggled={IsOpen} toggle={setOpen} color='white' />
+          </div>
         </div>
-        <ul className='flex'>
-          {navBarItems.map(items =>
-            <li key={items.id}
-              className="text-white">
-              <a href={items.href}>{items.title}</a>
-            </li>
-          )}
-        </ul>
-      </nav> */}
+
+        {IsOpen &&
+          <>
+            <div
+              className='fixed inset-0 bg-black/50 z-40'
+              onClick={() => setOpen(false)}
+            />
+
+            <div className='bg-black fixed inset-y-0 left-0 w-1/2 z-50 flex flex-col items-center rounded-r-2xl'>
+              <div>
+                <Logo className='w-full h-auto' />
+              </div>
+              <div className='flex-1 flex items-center'>
+                <ul className='text-white flex flex-col items items-center gap-10 text-lg font-bold'>
+                  {navBarItems.map((item =>
+                    <li key={item.id}>
+                      <a href={item.href}>{item.title}</a>
+                    </li>
+                  ))}
+                </ul>
+
+              </div>
+            </div>
+          </>
+        }
+      </nav>
+
+      {/* Desktop View */}
+
     </>
   )
 }
