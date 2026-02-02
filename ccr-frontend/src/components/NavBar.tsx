@@ -25,30 +25,28 @@ function NavBar() {
           </div>
         </div>
 
-        {IsOpen &&
-          <>
-            <div
-              className='fixed inset-0 bg-black/50 z-40'
-              onClick={() => setOpen(false)}
-            />
+        <div
+          className=
+          {`fixed inset-0 bg-black z-40 ${IsOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'}`}
+          onClick={() => setOpen(false)}
+        />
 
-            <div className='bg-black fixed inset-y-0 left-0 w-1/2 z-50 flex flex-col items-center rounded-r-2xl'>
-              <div>
-                <Logo className='w-full h-auto' />
-              </div>
-              <div className='flex-1 flex items-center'>
-                <ul className='text-white flex flex-col items items-center gap-10 text-lg font-bold'>
-                  {navBarItems.map((item =>
-                    <li key={item.id}>
-                      <a href={item.href}>{item.title}</a>
-                    </li>
-                  ))}
-                </ul>
+        <div className=
+          {`bg-black fixed inset-y-0 left-0 w-1/2 z-50 flex flex-col items-center rounded-r-2xl transition duration-700 ease-in-out ${IsOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div>
+            <Logo className='w-full h-auto' />
+          </div>
+          <div className='flex-1 flex items-center'>
+            <ul className='text-white flex flex-col items items-center gap-10 text-lg font-bold'>
+              {navBarItems.map((item =>
+                <li key={item.id}>
+                  <a href={item.href}>{item.title}</a>
+                </li>
+              ))}
+            </ul>
 
-              </div>
-            </div>
-          </>
-        }
+          </div>
+        </div>
       </nav>
 
       {/* Desktop View */}
