@@ -8,10 +8,10 @@ Car-Collision-Center-Website/
 │   ├── main-site/          ← rename current ccr-frontend/ here
 │   └── admin-panel/        ← new Vite + React app
 ├── backend/
-│   ├── content-service/
-│   ├── media-service/
-│   ├── estimate-service/
-│   └── auth-service/
+│   ├── dgs-content-service/
+│   ├── dgs-media-service/
+│   ├── dgs-estimate-service/
+│   └── dgs-auth-service/
 ├── gateway/
 │   └── router.yaml         ← Apollo Router config
 └── docker-compose.yml
@@ -47,12 +47,15 @@ Car-Collision-Center-Website/
 
 | Route        | Purpose                                             |
 | ------------ | --------------------------------------------------- |
-| `/login`     | Username + password → JWT stored in httpOnly cookie |
-| `/dashboard` | Overview + recent estimate requests                 |
-| `/hero`      | Edit phone, email, headline text                    |
-| `/services`  | Add / edit / delete / reorder service cards         |
-| `/gallery`   | Upload / delete carousel images                     |
-| `/estimates` | View submitted quote requests                       |
+| `/login`           | Username + password → JWT stored in httpOnly cookie |
+| `/forgot-password` | Request a password reset email                      |
+| `/reset-password`  | Set a new password from an emailed reset token       |
+| `/dashboard`       | Overview + recent estimate requests                  |
+| `/hero`            | Edit phone, email, headline text                     |
+| `/services`        | Add / edit / delete / reorder service cards          |
+| `/gallery`         | Upload / delete carousel images                      |
+| `/estimates`       | View submitted quote requests                        |
+| `/users`           | Admin only — add/remove employee accounts, change roles |
 
 ---
 
@@ -68,14 +71,17 @@ Car-Collision-Center-Website/
 
 ---
 
-### `auth-service` (build this first)
+### `dgs-auth-service` (build this first)
 
 **DB schema `auth`:**
 
 ```
-admin_user     (id, username, password_hash, created_at)
-refresh_token  (id, admin_user_id, token_hash, expires_at, revoked)
+users                 (id, full_name, user_name, email, password_hash, role, created_at)
+refresh_token         (id, user_id, token_hash, expires_at, revoked)
+password_reset_token  (id, user_id, token_hash, expires_at, used, created_at)
 ```
+
+**Role enum:** `ADMIN | USER` — both roles share the same base permissions; only `ADMIN` can manage other accounts (create, change role, delete). `email` and `user_name` are both `UNIQUE NOT NULL`.
 
 **GraphQL mutations:**
 
@@ -83,15 +89,26 @@ refresh_token  (id, admin_user_id, token_hash, expires_at, revoked)
 login(username: String!, password: String!) → AuthPayload { accessToken, expiresIn }
 logout → Boolean
 refreshToken → AuthPayload
+
+# Admin only
+createUser(input: CreateUserInput!): User!
+updateUserRole(id: ID!, role: Role!): User!
+deleteUser(id: ID!): Boolean!
+
+# Public
+requestPasswordReset(email: String!): Boolean!
+resetPassword(token: String!, newPassword: String!): Boolean!
 ```
 
-**Libraries:** `io.jsonwebtoken:jjwt`, Spring Security
+**Libraries:** `io.jsonwebtoken:jjwt`, Spring Security, `spring-boot-starter-mail` (Resend SMTP relay — for password reset emails)
 
-**Token strategy:** Access token = 15 min JWT. Refresh token = 7 days, stored in DB. Set both as httpOnly cookies on the admin subdomain.
+**Token strategy:** Access token = 15 min JWT, never persisted — verified statelessly via signature + expiry on each request. Refresh token = 7 days, stored in DB as a hash (`token_hash`), so it can be revoked early (e.g. an employee leaves). Both set as httpOnly cookies on the admin subdomain.
+
+**Password reset flow:** `requestPasswordReset` generates a random token, stores its hash + a short expiry (30–60 min) in `password_reset_token`, and emails the raw token as a link. `resetPassword` hashes the incoming token, matches it against an unexpired/unused row, updates `password_hash`, marks the token used, and revokes all of that user's existing `refresh_token` rows.
 
 ---
 
-### `content-service`
+### `dgs-content-service`
 
 **DB schema `content`:**
 
@@ -117,7 +134,7 @@ reorderServices(ids: [ID!]!): [ServiceCard!]!
 
 ---
 
-### `media-service`
+### `dgs-media-service`
 
 **DB schema `media`:**
 
@@ -154,7 +171,7 @@ deleteMedia(id: ID!): Boolean!  # admin only
 
 ---
 
-### `estimate-service`
+### `dgs-estimate-service`
 
 **DB schema `estimates`:**
 
@@ -197,7 +214,7 @@ Apollo Router sits in front of all 4 subgraphs and federates them into one unifi
 | ------------- | ------------------------------------------------------------------------------------- |
 | Database      | NeonDB (PostgreSQL) — one project, 4 schemas: `auth`, `content`, `media`, `estimates` |
 | Image storage | Cloudflare R2 — free egress, ~$0.015/GB/month storage                                 |
-| Email         | Resend (SMTP relay)                                                                   |
+| Email         | Resend (SMTP relay) — used by `dgs-auth-service` (password reset) and `dgs-estimate-service` (submission notifications) |
 | Local dev     | `docker-compose.yml` — runs all 4 services, Apollo Router, and a local Postgres       |
 
 ---
@@ -211,10 +228,10 @@ Apollo Router sits in front of all 4 subgraphs and federates them into one unifi
 ## Build Order Recommendation
 
 1. **Repo restructure** — move `ccr-frontend/` → `frontend/main-site/`, create the other directories
-2. **`auth-service`** — get JWT login working end-to-end first
-3. **Apollo Router** — configure the gateway with just `auth-service` to start
-4. **`content-service`** — hero config + service card CRUD
+2. **`dgs-auth-service`** — get JWT login working end-to-end first
+3. **Apollo Router** — configure the gateway with just `dgs-auth-service` to start
+4. **`dgs-content-service`** — hero config + service card CRUD
 5. **Main site frontend** — finish NavBar desktop view, then build sections top to bottom
-6. **`media-service`** — set up R2 bucket + implement presigned URL flow
-7. **`estimate-service`** — form submission + email notification
+6. **`dgs-media-service`** — set up R2 bucket + implement presigned URL flow
+7. **`dgs-estimate-service`** — form submission + email notification
 8. **Admin panel** — login page first, then each editor page

@@ -14,10 +14,10 @@ Car-Collision-Center-Website/
 │   ├── main-site/       ← React landing page (currently ccr-frontend/)
 │   └── admin-panel/     ← React admin app (not yet created)
 ├── backend/
-│   ├── auth-service/    ← Spring Boot DGS subgraph
-│   ├── content-service/ ← Spring Boot DGS subgraph
-│   ├── media-service/   ← Spring Boot DGS subgraph
-│   └── estimate-service/← Spring Boot DGS subgraph
+│   ├── dgs-auth-service/    ← Spring Boot DGS subgraph
+│   ├── dgs-content-service/ ← Spring Boot DGS subgraph
+│   ├── dgs-media-service/   ← Spring Boot DGS subgraph
+│   └── dgs-estimate-service/← Spring Boot DGS subgraph
 ├── gateway/
 │   └── router.yaml      ← Apollo Router supergraph config
 ├── docker-compose.yml
@@ -48,7 +48,7 @@ No tests are configured yet.
 - **Java 21**, Spring Boot 3.x, **Lombok** for boilerplate
 - **Netflix DGS** (`com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter`) — each service is a GraphQL Federation v2 subgraph
 - **Apollo Router** (`ghcr.io/apollographql/router`) federates all 4 subgraphs into one endpoint
-- **Spring Security + JJWT** for JWT auth in `auth-service`; Router validates tokens and injects `x-admin-user-id` header downstream
+- **Spring Security + JJWT** for JWT auth in `dgs-auth-service`; Router validates tokens and injects `x-admin-user-id` header downstream
 - **Spring Data JPA** + PostgreSQL driver; **NeonDB** in production (one project, separate schemas per service)
 
 ## Key Architectural Decisions
