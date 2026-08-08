@@ -44,7 +44,7 @@ public class PasswordResetToken {
   private LocalDateTime expiresAt;
 
   @Column(nullable = false)
-  private Boolean used;
+  private boolean used;
 
   @CreationTimestamp
   private LocalDateTime createdAt;
